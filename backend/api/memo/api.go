@@ -16,6 +16,7 @@ func NewMemoApi(group fiber.Router) fiber.Router {
 	memoApi := group.Group("/memo", GetUserInfo)
 
 	memoApi.Put("", CreateMemo)
+	memoApi.Patch("", UpdateMemo)
 	memoApi.Post("/all", QueryMemos)
 	memoApi.Post("/:id", QueryMemoById)
 
@@ -24,6 +25,11 @@ func NewMemoApi(group fiber.Router) fiber.Router {
 
 type MemoCreate struct {
 	Content string `json:"content"`
+}
+
+type MemoUpdate struct {
+	Content string `json:"content"`
+	Id      string `json:"id"`
 }
 
 type MemoQuery struct {
@@ -107,7 +113,44 @@ func CreateMemo(c *fiber.Ctx) error {
 	return c.JSON(memo)
 }
 
-func QueryMemo() {}
+func UpdateMemo(c *fiber.Ctx) error {
+
+	_store, _ := c.Locals("store").(*store.Store)
+	userId, _ := c.Locals("user_id").(string)
+	userName, _ := c.Locals("user_name").(string)
+
+	// 获取memo的内容
+	memoUpdate := MemoUpdate{}
+	err := c.BodyParser(&memoUpdate)
+
+	if err != nil {
+		return err
+	}
+
+	if len(memoUpdate.Content) == 0 {
+		return errors.New("内容为空")
+	}
+
+	// log.Println(memoCreate.Content)
+
+	memo, err := store.UpdateMemo(store.MemoUpdate{
+		Content:   memoUpdate.Content,
+		Id:        memoUpdate.Id,
+		CreatorId: userId,
+	}, *_store)
+
+	if err != nil {
+		return err
+	}
+
+	memo.CreatorName = userName
+
+	text := []byte(memo.Content)
+	tokens := parser.Parser(text)
+	memo.Content = render.RenderToHtml(text, tokens)
+
+	return c.JSON(memo)
+}
 
 func QueryMemos(c *fiber.Ctx) error {
 	_store, _ := c.Locals("store").(*store.Store)
@@ -154,5 +197,3 @@ func QueryMemoById(c *fiber.Ctx) error {
 
 	return c.JSON(memo)
 }
-
-func UpdateMemo() {}

@@ -8,17 +8,23 @@ import {
     MicVocalIcon
 } from 'lucide-vue-next';
 import { ref, useTemplateRef } from 'vue';
-import { createMemo } from '../../api/memo';
+import { createMemo, updateMemo } from '../../api/memo';
 import { RequestCode } from '../../api';
 import SelectList from '../resources/SelectList.vue';
 import { useEventListener } from '@vueuse/core';
 
-const emits = defineEmits(["create"])
+const { mode = 'create', memoId, rawContent } = defineProps<{
+    mode?: 'create' | 'update'
+    memoId?: string
+    rawContent?: string
+}>()
+
+const emits = defineEmits(["create", "update"])
 const loading = ref(false)
 
 const textArea = useTemplateRef("textarea")
 
-const onSubmit = async () => {
+const onCreate = async () => {
     loading.value = true
     const value = textArea.value?.value
 
@@ -34,6 +40,33 @@ const onSubmit = async () => {
         textArea.value.value = ""
     }
     loading.value = false
+}
+
+const onUpdate = async () => {
+    loading.value = true
+    const value = textArea.value?.value
+
+    if (!value) {
+        loading.value = false
+        return
+    }
+
+    const { code, data } = await updateMemo(value, memoId!)
+
+    if (code === RequestCode.REQUEST_SUCCESS) {
+        emits("update", data)
+        textArea.value.value = ""
+    }
+    loading.value = false
+}
+
+const onSubmit = async () => {
+    if (mode === 'create') {
+        onCreate()
+    }
+    if (mode === 'update' && memoId) {
+        onUpdate()
+    }
 }
 
 const isShowPackage = ref(false)
@@ -63,7 +96,8 @@ useEventListener('click', (event) => {
 <template>
     <!-- 编辑器 -->
     <div class=" bg-#ffffff border-(1px #ececec) shadow-[0_0_4px_#ececec] rounded-8px p-8px">
-        <textarea placeholder="此刻的想法..." ref="textarea" class="w-full outline-none min-h-[calc(6*1.5em)]" />
+        <textarea :value="rawContent" placeholder="此刻的想法..." ref="textarea"
+            class="w-full outline-none min-h-[calc(6*1.5em)]" />
         <!-- 快捷键 -->
         <div class="flex gap-0px items-center">
             <HashIcon class="cursor-pointer p-4px hover:bg-#ececec rounded-8px" :size="24" />

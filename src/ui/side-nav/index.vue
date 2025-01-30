@@ -32,9 +32,16 @@ const userInfo = useLocalStorage("user-info", () => {
     <!-- 侧边导航 -->
     <div class="pl-16px pr-32px">
         <div class="py-16px flex items-center">
-            <img v-if="userInfo.avator" class="w-48px h-48px border-2px rounded-1/2" src="https://picsum.photos/64/64" />
-            <div v-else class="w-48px h-48px border-2px rounded-1/2 text-1.5em font-600 flex items-center justify-center">M</div>
-            <div class="ml-8px">Memos</div>
+            <img v-if="userInfo.avator" class="w-48px h-48px border-2px rounded-1/2"
+                src="https://picsum.photos/64/64" />
+            <div v-else
+                class="w-48px h-48px border-2px rounded-1/2 text-1.5em font-600 flex items-center justify-center">{{
+                    userInfo.username?.[0].toUpperCase() || 'M' }}
+            </div>
+            <div class="ml-8px">
+                <div class="font-600">{{ userInfo.username }}</div>
+                <div class="text-0.5em text-#acacac">{{ userInfo.email }}</div>
+            </div>
         </div>
         <div class="flex flex-col gap-8px">
             <div v-if="accessToken !== null" @click="router.push('/')"
@@ -50,7 +57,7 @@ const userInfo = useLocalStorage("user-info", () => {
                 <div>探索</div>
             </div>
             <div @click="router.push('/resources')" v-if="accessToken !== null"
-                :class="{'bg-#ffffff border-1px shadow-[0_0_2px_0_#f0f0f0]': activatedNames.includes('resources') }"
+                :class="{ 'bg-#ffffff border-1px shadow-[0_0_2px_0_#f0f0f0]': activatedNames.includes('resources') }"
                 class="flex items-center gap-4px rounded-16px px-16px py-8px cursor-pointer hover:(bg-#f0f0f0)">
                 <PackageOpenIcon :size="18" />
                 <div>资源库</div>

@@ -77,6 +77,17 @@ function onCreate(data: any) {
     memosList.value = [...dataTransform([data]), ...memosList.value]
 }
 
+function onUpdate(memo: any) {
+    memosList.value = memosList.value.map((_memo) => {
+        if (_memo.id != memo.id) {
+            return _memo
+        } else {
+            _memo.content = memo.content
+            return _memo
+        }
+    })
+}
+
 onMounted(async () => {
     isLoading.value = true
     const _data = await queryMemos(pageNo.value)
@@ -101,13 +112,14 @@ onMounted(async () => {
     <!-- 首页 -->
     <div class="max-w-896px mx-auto flex gap-16px">
         <div class="grow">
-            <Editor @create="onCreate" />
+            <Editor mode="create" @create="onCreate" />
             <div class="mt-16px">
                 <!-- <div v-if="isLoading"
                     class="mx-auto relative animate-spin w-20px h-20px rounded-1/2 border-2px bg-gradient-conic bg-gradient-from-blue bg-gradient-to-lime before:(content-[''] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-1/2 w-75% h-75% bg-white)">
                 </div> -->
                 <!-- memos卡片列表 -->
-                <MemosCard v-for="memo in memosList" :key="memo.id" v-bind="memo" class="first:mt-0 mt-8px" />
+                <MemosCard v-for="memo in memosList" @update="onUpdate" :key="memo.id" v-bind="memo"
+                    class="first:mt-0 mt-8px" />
 
                 <div v-if="isMore" ref="loading" class="flex flex-col items-center mt-16px">
                     <div

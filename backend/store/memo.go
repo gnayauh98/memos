@@ -26,6 +26,12 @@ type MemoCreate struct {
 	CreatorId string
 }
 
+type MemoUpdate struct {
+	Content   string
+	Id        string
+	CreatorId string
+}
+
 type MemoQuery struct {
 	CreatorId string
 	PageSize  int64
@@ -43,6 +49,27 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 		"insert into memos (content, creator_id) values ($1, $2) returning id, create_at, update_at;",
 		memoCreate.Content,
 		memoCreate.CreatorId,
+	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
+
+	if err != nil {
+		return Memo{}, err
+	}
+
+	return memo, err
+}
+
+func UpdateMemo(memoUpdate MemoUpdate, store Store) (Memo, error) {
+
+	memo := Memo{
+		Content:   memoUpdate.Content,
+		CreatorId: memoUpdate.CreatorId,
+		Id:        memoUpdate.Id,
+	}
+
+	err := store.db.QueryRow(
+		"update memos set content=$1 where id=$2 returning id, create_at, update_at;",
+		memoUpdate.Content,
+		memoUpdate.Id,
 	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
 
 	if err != nil {
