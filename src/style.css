@@ -80,6 +80,7 @@ li.list-item::before {
   background-clip: text;
   font-weight: 600;
   cursor: pointer;
+  font-size: 0.5em;
 }
 
 .tag::before {

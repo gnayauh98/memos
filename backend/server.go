@@ -6,6 +6,7 @@ import (
 	"github.com/gofiber/fiber/v2"
 	"github.com/kehuay/aimemos/api/auth"
 	"github.com/kehuay/aimemos/api/memo"
+	"github.com/kehuay/aimemos/api/resource"
 	"github.com/kehuay/aimemos/api/user"
 	"github.com/kehuay/aimemos/store"
 )
@@ -31,6 +32,7 @@ func main() {
 	user.NewUserApi(appApi)
 	auth.NewAuthApi(appApi)
 	memo.NewMemoApi(appApi)
+	resource.NewResourceApi(appApi)
 
 	app.Listen(":3000")
 }
