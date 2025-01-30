@@ -5,18 +5,30 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"strconv"
 
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
+	"github.com/kehuay/aimemos/api/memo"
 	"github.com/kehuay/aimemos/store"
 )
 
 // 定义类型
 
 type ResourceCreate struct {
-	Data []byte    `json:"data"`
-	Type string    `json:"type"`
-	Id   uuid.UUID `json:"id,omitempty"`
+	Data      []byte    `json:"data"`
+	Type      string    `json:"type"`
+	Id        uuid.UUID `json:"id,omitempty"`
+	CreatorId int64     `json:"creator_id,omitempty"`
+}
+
+type ResourceQuery struct {
+	CreatorId int64 `json:"creator_id,omitempty"`
+}
+
+type Resource struct {
+	Url string `json:"url"`
+	Id  string `json:"id"`
 }
 
 // 定义函数
@@ -25,8 +37,9 @@ func NewResourceApi(group fiber.Router) fiber.Router {
 	resourceApi := group.Group("/resource")
 
 	// 新建
-	resourceApi.Post("", createResource)
+	resourceApi.Post("", memo.GetUserInfo, createResource)
 	resourceApi.Get("/:id", getResource)
+	resourceApi.Post("/all", memo.GetUserInfo, getResources)
 
 	return resourceApi
 }
@@ -66,10 +79,19 @@ func createResource(c *fiber.Ctx) error {
 
 	_store := c.Locals("store").(*store.Store)
 
+	user_id := c.Locals("user_id").(string)
+
+	resourceCreate.CreatorId, err = strconv.ParseInt(user_id, 10, 64)
+
+	if err != nil {
+		return err
+	}
+
 	_, err = store.CreateResource(store.Resource{
-		Id:   resourceCreate.Id,
-		Type: resourceCreate.Type,
-		Data: resourceCreate.Data,
+		Id:        resourceCreate.Id,
+		Type:      resourceCreate.Type,
+		Data:      resourceCreate.Data,
+		CreatorId: resourceCreate.CreatorId,
 	}, *_store)
 
 	// log.Println(resourceCreate)
@@ -103,4 +125,36 @@ func getResource(c *fiber.Ctx) error {
 	c.Set("content-type", "image/png")
 
 	return c.Send(resource.Data)
+}
+
+func getResources(c *fiber.Ctx) error {
+
+	user_id := c.Locals("user_id").(string)
+	_store := c.Locals("store").(*store.Store)
+
+	_user_id, err := strconv.ParseInt(user_id, 10, 64)
+
+	if err != nil {
+		return err
+	}
+
+	rows, err := store.QueryResources(store.Resource{
+		CreatorId: _user_id,
+	}, *_store)
+
+	if err != nil {
+		return err
+	}
+
+	resource := make([]Resource, 0)
+
+	for _, row := range rows {
+		resource = append(resource, Resource{
+			Url: fmt.Sprintf("/api/resource/%s", row.Id),
+			Id:  row.Id.String(),
+		})
+	}
+
+	return c.JSON(resource)
+
 }

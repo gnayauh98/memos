@@ -30,6 +30,11 @@ func Parser(text []byte) []token.Token {
 			Matcher: blocks.FindCodeIndex,
 		},
 		{
+			Type:    blocks.Image,
+			Tag:     "img",
+			Matcher: blocks.FindImageIndex,
+		},
+		{
 			Type:    blocks.Paragraph,
 			Tag:     "p",
 			Matcher: blocks.FindParagraphIndex,

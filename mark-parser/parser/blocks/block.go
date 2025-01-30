@@ -15,6 +15,7 @@ const (
 	Paragraph
 	List
 	Code
+	Image
 )
 
 type Block struct {
@@ -29,6 +30,8 @@ type Indexes struct {
 	Matches []int // 捕获组内容索引
 	Type    BlockType
 }
+
+type SkipInlineParseTypeSet map[BlockType]struct{}
 
 func (indexes Indexes) GetNextContent(text []byte) []byte {
 	if (indexes.Indexes[1] + 1) > len(text) {
@@ -75,6 +78,12 @@ func BlockParse(
 	parsers []Block,
 	inlineParsers []inline.Inline,
 ) []token.Token {
+
+	SkipParseSet := make(SkipInlineParseTypeSet)
+
+	SkipParseSet[Image] = struct{}{}
+	// SkipParseSet[Code] = struct{}{}
+
 	blockStartIndex := 0
 	for {
 		var indexes Indexes
@@ -92,12 +101,15 @@ func BlockParse(
 					Text:            indexes.Indexes[:2], // 从块开始索引开始的下标
 					Children:        []token.Token{},
 				})
-				tokens = inline.InlineParse(
-					inlineContent,
-					tokens,
-					blockStartIndex+indexes.GetContentStartIndex(),
-					inlineParsers,
-				)
+				if _, ok := SkipParseSet[indexes.Type]; !ok {
+					tokens = inline.InlineParse(
+						inlineContent,
+						tokens,
+						blockStartIndex+indexes.GetContentStartIndex(),
+						inlineParsers,
+					)
+				}
+
 				tokens = append(tokens, token.Token{
 					Type:            "block-end",
 					Tag:             int(indexes.Type),

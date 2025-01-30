@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { GridIcon, ImageUpIcon, ListIcon } from "lucide-vue-next"
-import { ref } from "vue";
-import { createResource } from "../../api/resource";
+import { onMounted, ref } from "vue";
+import { createResource, getResources } from "../../api/resource";
 import { RequestCode } from "../../api";
 
 // const isOpened = ref(false)
@@ -42,6 +42,12 @@ async function onUploadInput() {
     id: data.data.id
   }, ...resourceList.value]
 }
+
+onMounted(async () => {
+  const data = await getResources()
+
+  resourceList.value = [...data, ...resourceList.value]
+})
 </script>
 
 <template>

@@ -73,7 +73,7 @@ function dataTransform(data: any) {
 }
 
 function onCreate(data: any) {
-    console.log(data)
+    // console.log(data)
     memosList.value = [...dataTransform([data]), ...memosList.value]
 }
 
@@ -99,15 +99,15 @@ onMounted(async () => {
 
 <template>
     <!-- 首页 -->
-    <div class="max-w-768px mx-auto flex gap-16px">
+    <div class="max-w-896px mx-auto flex gap-16px">
         <div class="grow">
             <Editor @create="onCreate" />
             <div class="mt-16px">
-                <div v-if="isLoading"
+                <!-- <div v-if="isLoading"
                     class="mx-auto relative animate-spin w-20px h-20px rounded-1/2 border-2px bg-gradient-conic bg-gradient-from-blue bg-gradient-to-lime before:(content-[''] absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 rounded-1/2 w-75% h-75% bg-white)">
-                </div>
+                </div> -->
                 <!-- memos卡片列表 -->
-                <MemosCard v-else v-for="memo in memosList" :key="memo.id" v-bind="memo" class="first:mt-0 mt-8px" />
+                <MemosCard v-for="memo in memosList" :key="memo.id" v-bind="memo" class="first:mt-0 mt-8px" />
 
                 <div v-if="isMore" ref="loading" class="flex flex-col items-center mt-16px">
                     <div
