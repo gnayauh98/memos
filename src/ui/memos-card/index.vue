@@ -1,5 +1,5 @@
 <script lang="ts" setup>
-import { EllipsisVerticalIcon, ListStartIcon, PencilIcon, XIcon } from 'lucide-vue-next';
+import { EllipsisVerticalIcon, ListStartIcon, MessagesSquareIcon, PencilIcon, XIcon } from 'lucide-vue-next';
 import Editor from '../editor/index.vue'
 import { ref } from 'vue';
 import { getMemoById } from '../../api/memo';
@@ -36,12 +36,13 @@ const onUpdate = (memo: any) => {
         <div class="flex items-center">
             <div class="text-0.75em font-600 text-#00009f cursor-pointer">{{ author ? `@${author}` : '' }}</div>
             <div class="ml-8px text-0.75em text-#808080">{{ updateDate }}</div>
-            <div class="ml-auto">
+            <MessagesSquareIcon class="ml-auto cursor-pointer text-#808080" :size="12" />
+            <div class="ml-4px">
                 <div class="relative group">
-                    <EllipsisVerticalIcon :size="16"
+                    <EllipsisVerticalIcon :size="12"
                         class="cursor-pointer text-#808080 rounded-1/2 group-hover:bg-#f0f0f0 hover:(bg-#f0f0f0)" />
                     <div
-                        class="absolute z-99 text-12px border-1px rounded-8px px-0.5em py-0.25em bg-#f4f4f5 hidden group-hover:block top-16px right-0px w-70px">
+                        class="absolute z-99 text-12px border-1px rounded-8px px-0.5em py-0.25em bg-#f4f4f5 hidden group-hover:block top-12px right-0px w-70px">
                         <div @click="getRawContent" class="flex gap-4px items-center cursor-pointer">
                             <PencilIcon :size="12" />
                             <span>编辑</span>

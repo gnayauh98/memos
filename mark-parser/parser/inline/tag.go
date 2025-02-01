@@ -3,7 +3,7 @@ package inline
 import "regexp"
 
 const (
-	TagRegexp = `^#(.*)`
+	TagRegexp = `^#([^\s#]+)`
 )
 
 func FindTagIndex(text []byte) (Indexes, bool) {

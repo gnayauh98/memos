@@ -11,7 +11,7 @@ import {
     SearchIcon
 } from 'lucide-vue-next';
 import dayjs from 'dayjs';
-import { queryMemos } from '../api/memo';
+import { queryMemos, queryTags } from '../api/memo';
 
 const memosList = ref<({
     id: string
@@ -22,6 +22,7 @@ const memosList = ref<({
 const isLoading = ref(false)
 const isMore = ref(true)
 const pageNo = ref(1)
+const tags = ref<{ id: string, name: string }[]>([])
 
 const dateList = reactive({
     current: {
@@ -88,7 +89,7 @@ function onUpdate(memo: any) {
     })
 }
 
-onMounted(async () => {
+async function initMemos() {
     isLoading.value = true
     const _data = await queryMemos(pageNo.value)
 
@@ -105,6 +106,19 @@ onMounted(async () => {
     if (isMore.value) {
         observer.observe(loadingEle.value!)
     }
+}
+
+async function initTags() {
+    const { code, data } = await queryTags()
+    if (code !== 1000) {
+        return
+    }
+    tags.value = data
+}
+
+onMounted(async () => {
+    initMemos()
+    initTags()
 })
 </script>
 
@@ -218,25 +232,9 @@ onMounted(async () => {
                     <div class="mt-16px">
                         <div class="text-#808080">标签集</div>
                         <div class="mt-8px flex gap-8px gap-row-0 flex-wrap">
-                            <div class="flex items-center cursor-pointer">
+                            <div v-for="tag in tags" :key="tag.id" class="flex items-center cursor-pointer">
                                 <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">TODO</span>
-                            </div>
-                            <div class="flex items-center cursor-pointer">
-                                <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">Vue</span>
-                            </div>
-                            <div class="flex items-center cursor-pointer">
-                                <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">日记</span>
-                            </div>
-                            <div class="flex items-center cursor-pointer">
-                                <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">随笔</span>
-                            </div>
-                            <div class="flex items-center cursor-pointer">
-                                <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">资源</span>
+                                <span class="ml-2px text-0.8em">{{ tag.name }}</span>
                             </div>
                         </div>
                     </div>

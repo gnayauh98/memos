@@ -1,6 +1,11 @@
 package store
 
-import "database/sql"
+import (
+	"database/sql"
+	"fmt"
+	"log"
+	"strings"
+)
 
 type Memo struct {
 	Id          string     `json:"id"`
@@ -24,18 +29,29 @@ const (
 type MemoCreate struct {
 	Content   string
 	CreatorId string
+	Tags      []string
 }
 
 type MemoUpdate struct {
 	Content   string
 	Id        string
 	CreatorId string
+	Tags      []string
 }
 
 type MemoQuery struct {
 	CreatorId string
 	PageSize  int64
 	PageNo    int64
+}
+
+type Tag struct {
+	Id   string `json:"id"`
+	Name string `json:"name"`
+}
+
+type TagQuery struct {
+	CreatorId string `json:"creator_id"`
 }
 
 func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
@@ -45,13 +61,65 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 		CreatorId: memoCreate.CreatorId,
 	}
 
-	err := store.db.QueryRow(
+	tx, err := store.db.Begin()
+	if err != nil {
+		return Memo{}, err
+	}
+	defer tx.Rollback()
+	// 查询已经存在的tags
+	rows, err := tx.Query("select name from tags where creator_id=$1", memoCreate.CreatorId)
+	if err != nil {
+		return Memo{}, err
+	}
+	defer rows.Close()
+
+	tagsMap := make(map[string]bool, len(memoCreate.Tags))
+	for _, tag := range memoCreate.Tags {
+		tagsMap[tag] = false
+	}
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return Memo{}, err
+		}
+		tagsMap[name] = true
+	}
+	// 过滤不存在标签
+	var tags []any
+
+	for _, tag := range memoCreate.Tags {
+		if !tagsMap[tag] {
+			tags = append(tags, tag)
+		}
+	}
+	if len(tags) > 0 {
+		valuesStr := make([]any, 0, len(tags)*2)
+		placeholderStr := make([]string, len(tags))
+		for index, tag := range tags {
+			valuesStr = append(valuesStr, tag, memoCreate.CreatorId)
+			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
+		}
+		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s`, strings.Join(placeholderStr, ","))
+		log.Printf("%s", queryStmt)
+		log.Println(valuesStr...)
+
+		if _, err = tx.Exec(queryStmt, valuesStr...); err != nil {
+			return Memo{}, err
+		}
+	}
+
+	err = tx.QueryRow(
 		"insert into memos (content, creator_id) values ($1, $2) returning id, create_at, update_at;",
 		memoCreate.Content,
 		memoCreate.CreatorId,
 	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
 
 	if err != nil {
+		return Memo{}, err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return Memo{}, err
 	}
 
@@ -66,13 +134,65 @@ func UpdateMemo(memoUpdate MemoUpdate, store Store) (Memo, error) {
 		Id:        memoUpdate.Id,
 	}
 
-	err := store.db.QueryRow(
+	tx, err := store.db.Begin()
+	if err != nil {
+		return Memo{}, err
+	}
+	defer tx.Rollback()
+	// 查询已经存在的tags
+	rows, err := tx.Query("select name from tags where creator_id=$1", memoUpdate.CreatorId)
+	if err != nil {
+		return Memo{}, err
+	}
+	defer rows.Close()
+
+	tagsMap := make(map[string]bool, len(memoUpdate.Tags))
+	for _, tag := range memoUpdate.Tags {
+		tagsMap[tag] = false
+	}
+	for rows.Next() {
+		var name string
+		err = rows.Scan(&name)
+		if err != nil {
+			return Memo{}, err
+		}
+		tagsMap[name] = true
+	}
+	// 过滤不存在标签
+	var tags []any
+
+	for _, tag := range memoUpdate.Tags {
+		if !tagsMap[tag] {
+			tags = append(tags, tag)
+		}
+	}
+	if len(tags) > 0 {
+		valuesStr := make([]any, 0, len(tags)*2)
+		placeholderStr := make([]string, len(tags))
+		for index, tag := range tags {
+			valuesStr = append(valuesStr, tag, memoUpdate.CreatorId)
+			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
+		}
+		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s`, strings.Join(placeholderStr, ","))
+		log.Printf("%s", queryStmt)
+		log.Println(valuesStr...)
+
+		if _, err = tx.Exec(queryStmt, valuesStr...); err != nil {
+			return Memo{}, err
+		}
+	}
+
+	err = tx.QueryRow(
 		"update memos set content=$1 where id=$2 returning id, create_at, update_at;",
 		memoUpdate.Content,
 		memoUpdate.Id,
 	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
 
 	if err != nil {
+		return Memo{}, err
+	}
+
+	if err = tx.Commit(); err != nil {
 		return Memo{}, err
 	}
 
@@ -101,6 +221,8 @@ func QueryMemos(memoQuery MemoQuery, store Store) ([]Memo, error) {
 	if err != nil {
 		return []Memo{}, err
 	}
+
+	defer rows.Close()
 
 	memos := make([]Memo, 0)
 
@@ -134,4 +256,25 @@ func QueryMemoById(id string, creator_id string, store Store) (Memo, error) {
 	).Scan(&memo.Id, &memo.Content, &memo.CreateAt, &memo.UpdateAt, &memo.CreatorId, &memo.IsFixed, &memo.Status)
 
 	return memo, err
+}
+
+func QueryTags(tagQuery TagQuery, store Store) ([]Tag, error) {
+	rows, err := store.db.Query(`select id, name from tags where creator_id=$1;`, tagQuery.CreatorId)
+
+	if err != nil {
+		return []Tag{}, err
+	}
+
+	defer rows.Close()
+
+	tags := make([]Tag, 0)
+	for rows.Next() {
+		var tag Tag
+		if err = rows.Scan(&tag.Id, &tag.Name); err != nil {
+			return []Tag{}, err
+		}
+		tags = append(tags, tag)
+	}
+
+	return tags, nil
 }

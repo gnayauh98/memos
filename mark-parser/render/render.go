@@ -35,7 +35,15 @@ func RenderBlockStart(texts []byte, token token.Token) string {
 	case int(blocks.List):
 		return "<li class=\"list-item\">"
 	case int(blocks.TodoList):
-		return "<li class=\"todo-item\">"
+		// 提取状态
+		status := string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]])
+		if status == "X" {
+			return "<li class=\"todo-item done\">"
+		} else if status == "I" {
+			return "<li class=\"todo-item doing\">"
+		} else {
+			return "<li class=\"todo-item\">"
+		}
 	case int(blocks.Code):
 		// 获取语言
 		lang := string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]])

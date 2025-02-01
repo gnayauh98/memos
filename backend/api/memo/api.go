@@ -9,6 +9,7 @@ import (
 	"github.com/kehuay/aimemos/api/auth"
 	"github.com/kehuay/aimemos/store"
 	"github.com/kehuay/mark-parser/parser"
+	"github.com/kehuay/mark-parser/parser/token"
 	"github.com/kehuay/mark-parser/render"
 )
 
@@ -18,6 +19,7 @@ func NewMemoApi(group fiber.Router) fiber.Router {
 	memoApi.Put("", CreateMemo)
 	memoApi.Patch("", UpdateMemo)
 	memoApi.Post("/all", QueryMemos)
+	memoApi.Post("/tags", QueryTags)
 	memoApi.Post("/:id", QueryMemoById)
 
 	return memoApi
@@ -95,9 +97,13 @@ func CreateMemo(c *fiber.Ctx) error {
 
 	// log.Println(memoCreate.Content)
 
+	text := []byte(memoCreate.Content)
+	tokens := parser.Parser(text)
+
 	memo, err := store.CreateMemo(store.MemoCreate{
 		Content:   memoCreate.Content,
 		CreatorId: userId,
+		Tags:      token.GetTags(text, tokens),
 	}, *_store)
 
 	if err != nil {
@@ -106,8 +112,6 @@ func CreateMemo(c *fiber.Ctx) error {
 
 	memo.CreatorName = userName
 
-	text := []byte(memo.Content)
-	tokens := parser.Parser(text)
 	memo.Content = render.RenderToHtml(text, tokens)
 
 	return c.JSON(memo)
@@ -131,12 +135,14 @@ func UpdateMemo(c *fiber.Ctx) error {
 		return errors.New("内容为空")
 	}
 
-	// log.Println(memoCreate.Content)
+	text := []byte(memoUpdate.Content)
+	tokens := parser.Parser(text)
 
 	memo, err := store.UpdateMemo(store.MemoUpdate{
 		Content:   memoUpdate.Content,
 		Id:        memoUpdate.Id,
 		CreatorId: userId,
+		Tags:      token.GetTags(text, tokens),
 	}, *_store)
 
 	if err != nil {
@@ -145,8 +151,6 @@ func UpdateMemo(c *fiber.Ctx) error {
 
 	memo.CreatorName = userName
 
-	text := []byte(memo.Content)
-	tokens := parser.Parser(text)
 	memo.Content = render.RenderToHtml(text, tokens)
 
 	return c.JSON(memo)
@@ -196,4 +200,19 @@ func QueryMemoById(c *fiber.Ctx) error {
 	}
 
 	return c.JSON(memo)
+}
+
+func QueryTags(c *fiber.Ctx) error {
+	user_id, _ := c.Locals("user_id").(string)
+	_store, _ := c.Locals("store").(*store.Store)
+
+	tags, err := store.QueryTags(store.TagQuery{
+		CreatorId: user_id,
+	}, *_store)
+
+	if err != nil {
+		return err
+	}
+
+	return c.JSON(tags)
 }

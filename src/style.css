@@ -50,7 +50,15 @@ pre {
 }
 
 li.todo-item::marker {
+  content: '📝';
+}
+
+li.todo-item.done::marker {
   content: '✅';
+}
+
+li.todo-item.doing::marker {
+  content: '⏳';
 }
 
 li.list-item {

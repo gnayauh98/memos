@@ -111,3 +111,28 @@ export async function queryMemos(pageNo: number = 1) {
         data: json
     }
 }
+
+export async function queryTags() {
+
+    const accessToken = localStorage.getItem("access-token") ?? ""
+
+    const response = await fetch('/api/memo/tags', {
+        method: 'POST',
+        headers: {
+            'content-type': 'application/json',
+            'authorization': `bearer ${accessToken}`
+        }
+    })
+
+    if (!response.ok) {
+        return {
+            code: RequestCode.REQUEST_ERROR,
+        }
+    }
+    const json = await response.json()
+
+    return {
+        code: RequestCode.REQUEST_SUCCESS,
+        data: json
+    }
+}

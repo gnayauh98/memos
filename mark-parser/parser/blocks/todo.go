@@ -5,7 +5,7 @@ import (
 )
 
 const (
-	TodoRegexp = `^-\s\[([X ])\]\s(.*)`
+	TodoRegexp = `^-\s\[([XI ])\]\s(.*)`
 )
 
 func FindTodoItemIndex(text []byte) (Indexes, bool) {
