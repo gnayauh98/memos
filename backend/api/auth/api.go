@@ -6,10 +6,10 @@ import (
 	"fmt"
 	"log"
 
+	userApi "github.com/anqzi/memos/api/user"
+	"github.com/anqzi/memos/store"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	userApi "github.com/kehuay/aimemos/api/user"
-	"github.com/kehuay/aimemos/store"
 )
 
 func NewAuthApi(group fiber.Router) fiber.Router {

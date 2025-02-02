@@ -4,7 +4,7 @@ import (
 	"database/sql"
 	"log"
 
-	"github.com/kehuay/aimemos/store/db"
+	"github.com/anqzi/memos/store/db"
 )
 
 type Store struct {

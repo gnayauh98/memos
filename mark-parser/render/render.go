@@ -3,10 +3,14 @@ package render
 import (
 	"fmt"
 	"strconv"
+	"strings"
 
-	"github.com/kehuay/mark-parser/parser/blocks"
-	"github.com/kehuay/mark-parser/parser/inline"
-	"github.com/kehuay/mark-parser/parser/token"
+	"github.com/alecthomas/chroma/v2/formatters/html"
+	"github.com/alecthomas/chroma/v2/lexers"
+	"github.com/alecthomas/chroma/v2/styles"
+	"github.com/anqzi/mark-parser/parser/blocks"
+	"github.com/anqzi/mark-parser/parser/inline"
+	"github.com/anqzi/mark-parser/parser/token"
 )
 
 func RenderToHtml(texts []byte, tokens []token.Token) string {
@@ -47,7 +51,8 @@ func RenderBlockStart(texts []byte, token token.Token) string {
 	case int(blocks.Code):
 		// 获取语言
 		lang := string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]])
-		return fmt.Sprintf("<div><div class=\"top\"><span class=\"lang\">%s</span><span class=\"icon i-lucide:clipboard\"></span></div><pre class=\"lang-%s\"><code>", lang, lang)
+		text := texts[token.BlockStartIndex+token.Matches[2] : token.BlockStartIndex+token.Matches[3]]
+		return fmt.Sprintf("<div><div class=\"top\"><span class=\"lang\">%s</span><span class=\"icon i-lucide:clipboard\"></span></div>%s", lang, RenderCodeHighlight(text, lang))
 	case int(blocks.Image):
 		// 提取宽度
 		style := ""
@@ -96,7 +101,7 @@ func RenderBlockEnd(texts []byte, token token.Token) string {
 	case int(blocks.TodoList):
 		return "</li>"
 	case int(blocks.Code):
-		return "</code></pre></div>"
+		return "</div>"
 	case int(blocks.Image):
 		return "</div>"
 	}
@@ -118,4 +123,27 @@ func RenderInline(texts []byte, token token.Token) string {
 	}
 
 	return text
+}
+
+func RenderCodeHighlight(texts []byte, lang string) string {
+
+	style := styles.Get("gruvbox-light")
+	if style == nil {
+		style = styles.Fallback
+	}
+	formatter := html.New(
+		html.WithLineNumbers(true),
+		html.TabWidth(2),
+		// html.Standalone(true),
+	)
+
+	lexer := lexers.Get(lang)
+
+	iterator, _ := lexer.Tokenise(nil, string(texts))
+
+	var sb strings.Builder
+
+	formatter.Format(&sb, style, iterator)
+
+	return sb.String()
 }

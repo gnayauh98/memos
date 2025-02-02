@@ -1,9 +1,9 @@
 package parser
 
 import (
-	"github.com/kehuay/mark-parser/parser/blocks"
-	"github.com/kehuay/mark-parser/parser/inline"
-	"github.com/kehuay/mark-parser/parser/token"
+	"github.com/anqzi/mark-parser/parser/blocks"
+	"github.com/anqzi/mark-parser/parser/inline"
+	"github.com/anqzi/mark-parser/parser/token"
 )
 
 func Parser(text []byte) []token.Token {

@@ -7,10 +7,10 @@ import (
 	"io"
 	"strconv"
 
+	"github.com/anqzi/memos/api/memo"
+	"github.com/anqzi/memos/store"
 	"github.com/gofiber/fiber/v2"
 	"github.com/google/uuid"
-	"github.com/kehuay/aimemos/api/memo"
-	"github.com/kehuay/aimemos/store"
 )
 
 // 定义类型

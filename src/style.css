@@ -43,9 +43,9 @@ div:has(>pre) {
   border-left: 4px solid #fbbf24;
 }
 
-pre {
-  padding: 0.25em 0.5em;
-}
+/* pre { */
+/* padding: 0.25em 0.5em; */
+/* } */
 
 div:has(~ pre) {
   background-color: #fef3c7;

@@ -4,13 +4,13 @@ import (
 	"flag"
 	"log"
 
+	"github.com/anqzi/memos/api/auth"
+	"github.com/anqzi/memos/api/memo"
+	"github.com/anqzi/memos/api/resource"
+	"github.com/anqzi/memos/api/user"
+	"github.com/anqzi/memos/store"
+	"github.com/anqzi/memos/store/db"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kehuay/aimemos/api/auth"
-	"github.com/kehuay/aimemos/api/memo"
-	"github.com/kehuay/aimemos/api/resource"
-	"github.com/kehuay/aimemos/api/user"
-	"github.com/kehuay/aimemos/store"
-	"github.com/kehuay/aimemos/store/db"
 )
 
 func main() {
@@ -20,8 +20,8 @@ func main() {
 	var host = flag.String("host", dbConfig.Host, "db host")
 	var port = flag.String("port", dbConfig.Port, "db port")
 	var dbuser = flag.String("user", dbConfig.User, "db user")
-	var dbname = flag.String("dbname", dbConfig.DBName, "db database")
-	var dbpassword = flag.String("password", dbConfig.Password, "db password")
+	var dbname = flag.String("db", dbConfig.DBName, "db database")
+	var dbpassword = flag.String("pass", dbConfig.Password, "db password")
 
 	flag.Parse()
 

@@ -3,13 +3,13 @@ package main
 import (
 	"fmt"
 
-	"github.com/kehuay/mark-parser/parser"
-	"github.com/kehuay/mark-parser/render"
+	"github.com/anqzi/mark-parser/parser"
+	"github.com/anqzi/mark-parser/render"
 )
 
 func main() {
 
-	text := "[使用Golang实现的代码高亮库](https://github.com/alecthomas/chroma)\n"
+	text := "```go\npackage main\nfunc main(){\nprintln(\"hello, anqzi!\")\n```"
 
 	bytes := []byte(text)
 	tokens := parser.Parser(bytes)

@@ -101,13 +101,19 @@ useEventListener('click', (event) => {
     }
 })
 
+const onTextareaInput = (event: Event) => {
+    const textArea = event.target as HTMLTextAreaElement
+    textArea.style.height = 'auto'
+    textArea.style.height = `${textArea.scrollHeight}px`
+}
+
 </script>
 
 <template>
     <!-- 编辑器 -->
     <div class=" bg-#ffffff border-(1px #ececec) shadow-[0_0_4px_#ececec] rounded-8px p-8px">
-        <textarea :value="textValue" placeholder="此刻的想法..." ref="textarea"
-            class="w-full outline-none min-h-[calc(6*1.5em)]" />
+        <textarea @input="onTextareaInput" :value="textValue" placeholder="此刻的想法..." ref="textarea"
+            class="w-full outline-none min-h-[calc(1*1.5em)]" />
         <!-- 快捷键 -->
         <div class="flex gap-0px items-center">
             <HashIcon class="cursor-pointer p-4px hover:bg-#ececec rounded-8px" :size="24" />

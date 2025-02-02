@@ -1,8 +1,8 @@
 package blocks
 
 import (
-	"github.com/kehuay/mark-parser/parser/inline"
-	"github.com/kehuay/mark-parser/parser/token"
+	"github.com/anqzi/mark-parser/parser/inline"
+	"github.com/anqzi/mark-parser/parser/token"
 )
 
 type Matcher func([]byte) (Indexes, bool)
@@ -82,7 +82,7 @@ func BlockParse(
 	SkipParseSet := make(SkipInlineParseTypeSet)
 
 	SkipParseSet[Image] = struct{}{}
-	// SkipParseSet[Code] = struct{}{}
+	SkipParseSet[Code] = struct{}{}
 
 	blockStartIndex := 0
 	for {

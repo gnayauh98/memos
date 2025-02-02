@@ -1,0 +1,11 @@
+[package]
+name = "backend-rust"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+axum = { version = "*" }
+tokio = { version = "*", features = ["full"] }
+sqlx = { version = "*", features = ["postgres", "runtime-tokio-rustls"] }
+serde = { version = "*", features = ["derive"] }
+clap = { version = "*", features = ["derive"] }

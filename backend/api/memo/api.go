@@ -4,13 +4,13 @@ import (
 	"errors"
 	"log"
 
+	"github.com/anqzi/mark-parser/parser"
+	"github.com/anqzi/mark-parser/parser/token"
+	"github.com/anqzi/mark-parser/render"
+	"github.com/anqzi/memos/api/auth"
+	"github.com/anqzi/memos/store"
 	"github.com/gofiber/fiber/v2"
 	"github.com/golang-jwt/jwt/v5"
-	"github.com/kehuay/aimemos/api/auth"
-	"github.com/kehuay/aimemos/store"
-	"github.com/kehuay/mark-parser/parser"
-	"github.com/kehuay/mark-parser/parser/token"
-	"github.com/kehuay/mark-parser/render"
 )
 
 func NewMemoApi(group fiber.Router) fiber.Router {

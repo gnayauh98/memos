@@ -7,8 +7,8 @@ import (
 	"fmt"
 	"log"
 
+	"github.com/anqzi/memos/store"
 	"github.com/gofiber/fiber/v2"
-	"github.com/kehuay/aimemos/store"
 )
 
 // 定义类型

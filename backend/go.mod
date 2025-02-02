@@ -1,9 +1,13 @@
-module github.com/kehuay/aimemos
+module github.com/anqzi/memos
 
 go 1.23.4
 
+require github.com/anqzi/mark-parser v0.0.0
+
 require (
+	github.com/alecthomas/chroma/v2 v2.15.0 // indirect
 	github.com/andybalholm/brotli v1.1.0 // indirect
+	github.com/dlclark/regexp2 v1.11.4 // indirect
 	github.com/gofiber/fiber/v2 v2.52.6 // indirect
 	github.com/gofiber/utils v0.0.10 // indirect
 	github.com/golang-jwt/jwt/v5 v5.2.1 // indirect
@@ -30,9 +34,6 @@ require (
 	golang.org/x/text v0.21.0 // indirect
 	gorm.io/driver/postgres v1.5.11 // indirect
 	gorm.io/gorm v1.25.12 // indirect
-	github.com/kehuay/mark-parser v0.0.0
 )
 
-replace (
-	github.com/kehuay/mark-parser => ../mark-parser
-)
+replace github.com/anqzi/mark-parser => ../mark-parser

@@ -1,7 +1,7 @@
 package inline
 
 import (
-	"github.com/kehuay/mark-parser/parser/token"
+	"github.com/anqzi/mark-parser/parser/token"
 )
 
 type Matcher func([]byte) (Indexes, bool)

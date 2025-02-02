@@ -3,7 +3,6 @@ package store
 import (
 	"database/sql"
 	"fmt"
-	"log"
 	"strings"
 )
 
@@ -46,8 +45,16 @@ type MemoQuery struct {
 }
 
 type Tag struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
+	Id        string `json:"id"`
+	Name      string `json:"name"`
+	CreatorId string `json:"creator_id"`
+}
+
+type TagMemo struct {
+	TagId     string `json:"tag_id"`
+	TagName   string `json:"tag_name"`
+	CreatorId string `json:"creator_id"`
+	MemoId    string `json:"memo_id"`
 }
 
 type TagQuery struct {
@@ -67,42 +74,34 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 	}
 	defer tx.Rollback()
 	// 查询已经存在的tags
-	rows, err := tx.Query("select name from tags where creator_id=$1", memoCreate.CreatorId)
-	if err != nil {
-		return Memo{}, err
-	}
-	defer rows.Close()
+	// rows, err := tx.Query("select name, creator_id from tags where creator_id=$1", memoCreate.CreatorId)
+	// if err != nil {
+	// return Memo{}, err
+	// }
+	// defer rows.Close()
 
-	tagsMap := make(map[string]bool, len(memoCreate.Tags))
-	for _, tag := range memoCreate.Tags {
-		tagsMap[tag] = false
-	}
-	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
-		if err != nil {
-			return Memo{}, err
-		}
-		tagsMap[name] = true
-	}
+	// tagsMap := make(map[string]bool, len(memoCreate.Tags))
+	// for _, tag := range memoCreate.Tags {
+	// 	tagsMap[tag] = false
+	// }
+	// for rows.Next() {
+	// 	var name string
+	// 	err = rows.Scan(&name)
+	// 	if err != nil {
+	// 		return Memo{}, err
+	// 	}
+	// 	tagsMap[name] = true
+	// }
 	// 过滤不存在标签
-	var tags []any
 
-	for _, tag := range memoCreate.Tags {
-		if !tagsMap[tag] {
-			tags = append(tags, tag)
-		}
-	}
-	if len(tags) > 0 {
-		valuesStr := make([]any, 0, len(tags)*2)
-		placeholderStr := make([]string, len(tags))
-		for index, tag := range tags {
+	if len(memoCreate.Tags) > 0 {
+		valuesStr := make([]any, 0, len(memoCreate.Tags)*2)
+		placeholderStr := make([]string, len(memoCreate.Tags))
+		for index, tag := range memoCreate.Tags {
 			valuesStr = append(valuesStr, tag, memoCreate.CreatorId)
 			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
 		}
-		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s`, strings.Join(placeholderStr, ","))
-		log.Printf("%s", queryStmt)
-		log.Println(valuesStr...)
+		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s on conflict (name, creator_id) do update set name=excluded.name, creator_id=excluded.creator_id;`, strings.Join(placeholderStr, ","))
 
 		if _, err = tx.Exec(queryStmt, valuesStr...); err != nil {
 			return Memo{}, err
@@ -139,45 +138,102 @@ func UpdateMemo(memoUpdate MemoUpdate, store Store) (Memo, error) {
 		return Memo{}, err
 	}
 	defer tx.Rollback()
-	// 查询已经存在的tags
-	rows, err := tx.Query("select name from tags where creator_id=$1", memoUpdate.CreatorId)
+	var valuesStr []any
+	var placeholderStr []string
+	if len(memoUpdate.Tags) > 0 {
+		valuesStr = make([]any, 0, len(memoUpdate.Tags)*2)
+		placeholderStr = make([]string, len(memoUpdate.Tags))
+		for index, tag := range memoUpdate.Tags {
+			valuesStr = append(valuesStr, tag, memoUpdate.CreatorId)
+			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
+		}
+
+	}
+
+	// 插入的新tag与老tag
+	// tagMemos := make([]TagMemo, 0, len(memoUpdate.Tags))
+	tagsMap := make(map[string]bool, len(memoUpdate.Tags))
+
+	if len(memoUpdate.Tags) > 0 {
+		// 插入tags
+		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s on conflict (name, creator_id) do update set name=excluded.name, creator_id=excluded.creator_id returning id, name, creator_id;`, strings.Join(placeholderStr, ","))
+
+		rows, err := tx.Query(queryStmt, valuesStr...)
+		if err != nil {
+			return Memo{}, err
+		}
+		defer rows.Close()
+
+		memoTagPairStr := make([]any, 0, len(memoUpdate.Tags)*2)
+
+		for rows.Next() {
+
+			tagMemo := TagMemo{
+				MemoId: memoUpdate.Id,
+			}
+
+			err = rows.Scan(&tagMemo.TagId, &tagMemo.TagName, &tagMemo.CreatorId)
+
+			if err != nil {
+				return Memo{}, err
+			}
+
+			tagsMap[tagMemo.TagId] = true
+			memoTagPairStr = append(memoTagPairStr, tagMemo.TagId, tagMemo.MemoId)
+
+			// tagMemos = append(tagMemos, tagMemo)
+		}
+
+		// 插入memo-tag
+		queryStmt = fmt.Sprintf(`insert into memo_tag (tag_id, memo_id) values %s on conflict (tag_id, memo_id) do update set tag_id=excluded.tag_id, memo_id=excluded.memo_id;`, strings.Join(placeholderStr, ","))
+
+		_, err = tx.Exec(queryStmt, memoTagPairStr...)
+
+		if err != nil {
+			return Memo{}, err
+		}
+	}
+
+	// log.Println(tagsMap)
+
+	// 查询当前存在的tag-memo对
+	rows, err := tx.Query("select tag_id, memo_id from memo_tag where memo_id=$1", memoUpdate.Id)
 	if err != nil {
 		return Memo{}, err
 	}
 	defer rows.Close()
 
-	tagsMap := make(map[string]bool, len(memoUpdate.Tags))
-	for _, tag := range memoUpdate.Tags {
-		tagsMap[tag] = false
-	}
+	deleteTagMemoIds := make([]any, 0)
+	deleteTagMemoPlaceholder := make([]string, 0)
+	countIndex := 2
+	deleteTagMemoIds = append(deleteTagMemoIds, memoUpdate.Id)
 	for rows.Next() {
-		var name string
-		err = rows.Scan(&name)
+		tagMemo := TagMemo{}
+		err = rows.Scan(&tagMemo.TagId, &tagMemo.MemoId)
 		if err != nil {
 			return Memo{}, err
 		}
-		tagsMap[name] = true
-	}
-	// 过滤不存在标签
-	var tags []any
+		if !tagsMap[tagMemo.TagId] {
+			deleteTagMemoPlaceholder = append(
+				deleteTagMemoPlaceholder,
+				fmt.Sprintf("$%d", countIndex),
+			)
+			countIndex += 1
+			deleteTagMemoIds = append(deleteTagMemoIds, tagMemo.TagId)
 
-	for _, tag := range memoUpdate.Tags {
-		if !tagsMap[tag] {
-			tags = append(tags, tag)
 		}
 	}
-	if len(tags) > 0 {
-		valuesStr := make([]any, 0, len(tags)*2)
-		placeholderStr := make([]string, len(tags))
-		for index, tag := range tags {
-			valuesStr = append(valuesStr, tag, memoUpdate.CreatorId)
-			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
-		}
-		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s`, strings.Join(placeholderStr, ","))
-		log.Printf("%s", queryStmt)
-		log.Println(valuesStr...)
 
-		if _, err = tx.Exec(queryStmt, valuesStr...); err != nil {
+	if len(deleteTagMemoIds) > 1 {
+		queryStmt := fmt.Sprintf("delete from memo_tag where memo_id=$1 and tag_id in (%s);", strings.Join(deleteTagMemoPlaceholder, ","))
+
+		// log.Println(queryStmt)
+		_, err = tx.Exec(
+			queryStmt,
+			deleteTagMemoIds...,
+		)
+
+		if err != nil {
 			return Memo{}, err
 		}
 	}
