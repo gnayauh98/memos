@@ -38,11 +38,11 @@ onMounted(async () => {
     <div class="max-w-768px mx-auto">
         <div v-for="memo in memoList" :key="memo.id"
             class="mt-32px first:mt-0 bg-white rounded-8px p-8px border-(1px solid #ececec)">
-            <div class="flex items-center relative pl-36px">
-                <img class="absolute -left-16px -top-16px object-cover w-48px h-48px rounded-1/2 border-(3px solid #f4f4f5)"
+            <div class="flex items-center relative">
+                <img class="object-cover w-48px h-48px rounded-1/2 border-(3px solid #f4f4f5)"
                     :src="`https://picsum.photos/200/200?r=${memo.id}`" />
                 <div class="ml-4px">
-                    <div>星光</div>
+                    <div>{{ memo.username }}</div>
                     <div class="text-0.8em text-#808080">发布于 {{ dayjs(memo.createAt).format("YYYY/MM/DD hh:mm") }}</div>
                 </div>
             </div>

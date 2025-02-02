@@ -3,7 +3,7 @@ package inline
 import "regexp"
 
 const (
-	CodeRegexp = `^'(.*?)'`
+	CodeRegexp = "^`(.*?)`"
 )
 
 func FindCodeIndex(text []byte) (Indexes, bool) {

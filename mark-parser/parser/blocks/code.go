@@ -3,7 +3,7 @@ package blocks
 import "regexp"
 
 const (
-	CodeRegexp = `^'''(.*)\s((?s).*)\s'''`
+	CodeRegexp = "^```(.*)\n((?s).*)\n```"
 )
 
 func FindCodeIndex(text []byte) (Indexes, bool) {

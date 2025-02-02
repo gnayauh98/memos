@@ -46,7 +46,7 @@ const routes: RouteRecordRaw[] = [
                 name: 'explore',
                 path: 'explore',
                 component: Explore,
-                beforeEnter: auth
+                // beforeEnter: auth
             },
             {
                 name: 'signin',

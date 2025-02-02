@@ -2,14 +2,42 @@ package db
 
 import (
 	"database/sql"
+	"fmt"
 
 	_ "github.com/lib/pq"
 )
 
-const Dsn = "host=14.103.71.103 port=6432 user=aimemos password=aimemos%2025 dbname=aimemos sslmode=disable TimeZone=Asia/Shanghai"
+type DBConfig struct {
+	Host     string
+	Port     string
+	User     string
+	Password string
+	DBName   string
+}
 
-func NewPostgresDB() (*sql.DB, error) {
-	db, err := sql.Open("postgres", Dsn)
+func NewDefaultDBConfig() DBConfig {
+	return DBConfig{
+		Host:     "127.0.0.1",
+		Port:     "6432",
+		User:     "postgres",
+		Password: "postgres",
+		DBName:   "postgres",
+	}
+}
+
+func NewPostgresDB(config DBConfig) (*sql.DB, error) {
+
+	db, err := sql.Open(
+		"postgres",
+		fmt.Sprintf(
+			"host=%s port=%s user=%s password=%s dbname=%s sslmode=disable TimeZone=Asia/Shanghai",
+			config.Host,
+			config.Port,
+			config.User,
+			config.Password,
+			config.DBName,
+		),
+	)
 
 	return db, err
 }

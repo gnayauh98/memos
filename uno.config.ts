@@ -1,9 +1,14 @@
-import { defineConfig } from 'unocss'
+import { defineConfig, presetUno, presetAttributify, presetIcons } from 'unocss'
 import transformerVariantGroup from '@unocss/transformer-variant-group'
 
 export default defineConfig({
-    // ...UnoCSS options
+    presets: [
+        presetAttributify(),
+        presetUno(),
+        presetIcons()
+    ],
     transformers: [
         transformerVariantGroup()
-    ]
+    ],
+    safelist: ["i-lucide:clipboard"]
 })

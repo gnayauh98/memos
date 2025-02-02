@@ -9,6 +9,7 @@
     "preview": "vite preview"
   },
   "dependencies": {
+    "@iconify-json/lucide": "^1.2.25",
     "@lucide/lab": "^0.1.2",
     "@unocss/reset": "^65.4.0",
     "@vueuse/core": "^12.5.0",

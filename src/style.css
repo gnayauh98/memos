@@ -35,18 +35,45 @@ h1 {
   font-weight: 600;
 }
 
-pre {
+div:has(>pre) {
   border: 1px solid #eaeaea;
-  padding: 0.25em 1em;
-  border-radius: 0.5em;
+  border-radius: 4px;
   width: 100%;
+  background-color: #fffbec;
+  border-left: 4px solid #fbbf24;
+}
+
+pre {
+  padding: 0.25em 0.5em;
+}
+
+div:has(~ pre) {
+  background-color: #fef3c7;
+  padding: 0 0.5em;
+  display: flex;
+  align-items: center;
+  color: #fbbf24;
+}
+
+div:has(~ pre)>.lang {
+  color: #fbbf24;
+}
+
+div:has(~ pre)>.icon {
+  margin-left: auto;
+  cursor: pointer;
 }
 
 .inline-code {
-  background: #eaeaea;
+  background: #fffbec;
   border: 1px solid #eaeaea;
   border-radius: 0.25em;
-  padding: 0 0.25em;
+  padding: 0 0.30em;
+}
+
+.outlink {
+  text-decoration: underline;
+  color: blue;
 }
 
 li.todo-item::marker {

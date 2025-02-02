@@ -3,6 +3,7 @@ package user
 import (
 	"crypto/md5"
 	"encoding/json"
+	"errors"
 	"fmt"
 	"log"
 
@@ -52,6 +53,14 @@ func registryUser(c *fiber.Ctx) error {
 	}
 
 	_store, _ := c.Locals("store").(*store.Store)
+
+	if len(userCreate.Password) < 4 {
+		return errors.New("密码长度正确")
+	}
+
+	if len(userCreate.Name) == 0 {
+		return errors.New("用户名不能为空")
+	}
 
 	err = store.CreateUser(store.UserCreate{
 		Name:         userCreate.Name,

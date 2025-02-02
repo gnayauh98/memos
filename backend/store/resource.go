@@ -14,7 +14,7 @@ type Resource struct {
 func CreateResource(resource Resource, store Store) (Resource, error) {
 
 	err := store.db.QueryRow(
-		"insert into resources (id, type, data,creator_id) values ($1, $2, $3, $4) returning id, type, data",
+		"insert into resources (id, type, raw,creator_id) values ($1, $2, $3, $4) returning id, type, raw",
 		resource.Id,
 		resource.Type,
 		resource.Data,
@@ -28,7 +28,7 @@ func QueryResource(id string, store Store) (Resource, error) {
 	resource := Resource{}
 
 	err := store.db.QueryRow(
-		"select id,type,data from resources where id = $1;",
+		"select id,type,raw from resources where id = $1;",
 		id,
 	).Scan(&resource.Id, &resource.Type, &resource.Data)
 

@@ -17,12 +17,14 @@ type InlineType int
 type Indexes struct {
 	Indexes []int
 	Type    InlineType
+	Matches []int
 }
 
 const (
 	Code InlineType = 1
 	Blob InlineType = 2
 	Tag  InlineType = 3
+	Link InlineType = 4
 )
 
 func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers []Inline) []token.Token {
@@ -52,6 +54,7 @@ func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers
 					BlockStartIndex: blockStartIndex,
 					Text:            []int{index + indexes.Indexes[2], index + indexes.Indexes[3]},
 					Children:        []token.Token{},
+					Matches:         indexes.Matches,
 				})
 				startIndex = index + indexes.Indexes[1]
 				index += indexes.Indexes[1]

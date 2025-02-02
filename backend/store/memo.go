@@ -21,8 +21,8 @@ type Memo struct {
 type MemoStatus string
 
 const (
-	MemoStatusDraft    MemoStatus = "draft"
-	MemoStatusActive   MemoStatus = "active"
+	MemoStatusDraft    MemoStatus = "private"
+	MemoStatusActive   MemoStatus = "public"
 	MemoStatusArchived MemoStatus = "archived"
 )
 
@@ -110,7 +110,7 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 	}
 
 	err = tx.QueryRow(
-		"insert into memos (content, creator_id) values ($1, $2) returning id, create_at, update_at;",
+		"insert into memos (markdown, creator_id) values ($1, $2) returning id, created_at, updated_at;",
 		memoCreate.Content,
 		memoCreate.CreatorId,
 	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
@@ -183,7 +183,7 @@ func UpdateMemo(memoUpdate MemoUpdate, store Store) (Memo, error) {
 	}
 
 	err = tx.QueryRow(
-		"update memos set content=$1 where id=$2 returning id, create_at, update_at;",
+		"update memos set markdown=$1 where id=$2 returning id, created_at, updated_at;",
 		memoUpdate.Content,
 		memoUpdate.Id,
 	).Scan(&memo.Id, &memo.CreateAt, &memo.UpdateAt)
@@ -206,14 +206,14 @@ func QueryMemos(memoQuery MemoQuery, store Store) ([]Memo, error) {
 
 	if memoQuery.PageNo != 0 && memoQuery.PageSize != 0 {
 		rows, err = store.db.Query(
-			"select memos.*, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by create_at desc limit $2 offset $3",
+			"select memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by created_at desc limit $2 offset $3",
 			memoQuery.CreatorId,
 			memoQuery.PageSize,
 			(memoQuery.PageNo-1)*memoQuery.PageSize,
 		)
 	} else {
 		rows, err = store.db.Query(
-			"select memos.*, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by create_at desc",
+			"select memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by created_at desc",
 			memoQuery.CreatorId,
 		)
 	}
@@ -228,14 +228,15 @@ func QueryMemos(memoQuery MemoQuery, store Store) ([]Memo, error) {
 
 	for rows.Next() {
 		memo := Memo{}
-		err = rows.Scan(&memo.Id,
+		err = rows.Scan(
+			&memo.Id,
 			&memo.Content,
 			&memo.CreateAt,
 			&memo.UpdateAt,
 			&memo.CreatorId,
-			&memo.IsFixed,
 			&memo.Status,
-			&memo.CreatorName)
+			&memo.CreatorName,
+		)
 		if err != nil {
 			return []Memo{}, err
 		}
@@ -250,10 +251,10 @@ func QueryMemoById(id string, creator_id string, store Store) (Memo, error) {
 	memo := Memo{}
 
 	err := store.db.QueryRow(
-		"select * from memos where id=$1 and creator_id=$2",
+		"select memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status from memos where id=$1 and creator_id=$2",
 		id,
 		creator_id,
-	).Scan(&memo.Id, &memo.Content, &memo.CreateAt, &memo.UpdateAt, &memo.CreatorId, &memo.IsFixed, &memo.Status)
+	).Scan(&memo.Id, &memo.Content, &memo.CreateAt, &memo.UpdateAt, &memo.CreatorId, &memo.Status)
 
 	return memo, err
 }

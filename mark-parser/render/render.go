@@ -47,7 +47,7 @@ func RenderBlockStart(texts []byte, token token.Token) string {
 	case int(blocks.Code):
 		// 获取语言
 		lang := string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]])
-		return fmt.Sprintf("<pre class=\"%s\"><code>", lang)
+		return fmt.Sprintf("<div><div class=\"top\"><span class=\"lang\">%s</span><span class=\"icon i-lucide:clipboard\"></span></div><pre class=\"lang-%s\"><code>", lang, lang)
 	case int(blocks.Image):
 		// 提取宽度
 		style := ""
@@ -96,7 +96,7 @@ func RenderBlockEnd(texts []byte, token token.Token) string {
 	case int(blocks.TodoList):
 		return "</li>"
 	case int(blocks.Code):
-		return "</code></pre>"
+		return "</code></pre></div>"
 	case int(blocks.Image):
 		return "</div>"
 	}
@@ -112,6 +112,9 @@ func RenderInline(texts []byte, token token.Token) string {
 		return fmt.Sprintf("<span class=\"inline-code\">%s</span>", text)
 	case int(inline.Tag):
 		return fmt.Sprintf("<span class=\"tag\">%s</span>", text)
+	case int(inline.Link):
+		link := string(texts[token.BlockStartIndex+token.Matches[2] : token.BlockStartIndex+token.Matches[3]])
+		return fmt.Sprintf("<a class=\"outlink\" target=\"_blank\" href=\"%s\">%s</a>", link, text)
 	}
 
 	return text

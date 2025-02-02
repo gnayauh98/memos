@@ -47,7 +47,7 @@ func GetUserInfo(c *fiber.Ctx) error {
 	if err != nil {
 		return err
 	}
-	if len(parserHeader.Authorization) < 6 {
+	if len(parserHeader.Authorization) <= 7 {
 		return errors.New("未鉴权")
 	}
 	// log.Println(parserHeader.Authorization[7:])

@@ -11,8 +11,8 @@ type Store struct {
 	db *sql.DB
 }
 
-func NewStore() (Store, error) {
-	_db, err := db.NewPostgresDB()
+func NewStore(config db.DBConfig) (Store, error) {
+	_db, err := db.NewPostgresDB(config)
 	if err != nil {
 		return Store{}, err
 	}
