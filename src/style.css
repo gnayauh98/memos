@@ -132,3 +132,24 @@ li.list-item::before {
   margin: 0 auto;
   object-fit: cover;
 }
+
+.memo-link {
+  border: 1px solid #f4f4f5;
+  padding: 0 0.25em;
+  border-radius: 0.75em;
+  display: inline-flex;
+  align-items: center;
+  color: #646465;
+  cursor: pointer;
+  box-sizing: border-box;
+}
+
+.memo-link:hover {
+  border: 1px solid #e4e4e5;
+}
+
+.memo-link-mark {
+  display: inline-block;
+  color: blue;
+  margin-right: 2px;
+}

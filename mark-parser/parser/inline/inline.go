@@ -21,10 +21,11 @@ type Indexes struct {
 }
 
 const (
-	Code InlineType = 1
-	Blob InlineType = 2
-	Tag  InlineType = 3
-	Link InlineType = 4
+	Code     InlineType = 1
+	Blob     InlineType = 2
+	Tag      InlineType = 3
+	Link     InlineType = 4
+	MemoLink InlineType = 5
 )
 
 func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers []Inline) []token.Token {

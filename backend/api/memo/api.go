@@ -20,6 +20,7 @@ func NewMemoApi(group fiber.Router) fiber.Router {
 	memoApi.Patch("", UpdateMemo)
 	memoApi.Post("/all", QueryMemos)
 	memoApi.Post("/tags", QueryTags)
+	memoApi.Post("/filter", QueryMemosByFilter)
 	memoApi.Post("/:id", QueryMemoById)
 
 	return memoApi
@@ -167,6 +168,53 @@ func QueryMemos(c *fiber.Ctx) error {
 		CreatorId: userId,
 		PageNo:    memoQuery.PageNo,
 		PageSize:  memoQuery.PageSize,
+	}, *_store)
+
+	if err != nil {
+		return err
+	}
+
+	// markdown转换为html
+	for index := range memos {
+		text := []byte(memos[index].Content)
+		tokens := parser.Parser(text)
+		memos[index].Content = render.RenderToHtml(text, tokens)
+	}
+
+	return c.JSON(memos)
+}
+
+type MemoQueryFilter struct {
+	PageNo   int64    `json:"pageNo"`
+	PageSize int64    `json:"pageSize"`
+	Tags     []string `json:"tags"`
+}
+
+func QueryMemosByFilter(c *fiber.Ctx) error {
+
+	memoQueryFilter := MemoQueryFilter{}
+
+	err := c.BodyParser(&memoQueryFilter)
+
+	if err != nil {
+		return errors.New("请求参数错误")
+	}
+
+	if memoQueryFilter.PageNo == 0 {
+		memoQueryFilter.PageNo = 1
+	}
+	if memoQueryFilter.PageSize == 0 {
+		memoQueryFilter.PageSize = 10
+	}
+
+	_store, _ := c.Locals("store").(*store.Store)
+	userId, _ := c.Locals("user_id").(string)
+
+	memos, err := store.QueryMemos(store.MemoQuery{
+		CreatorId: userId,
+		PageNo:    memoQueryFilter.PageNo,
+		PageSize:  memoQueryFilter.PageSize,
+		Tags:      memoQueryFilter.Tags,
 	}, *_store)
 
 	if err != nil {

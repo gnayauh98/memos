@@ -11,7 +11,8 @@ import {
     SearchIcon
 } from 'lucide-vue-next';
 import dayjs from 'dayjs';
-import { queryMemos, queryTags } from '../api/memo';
+import { queryMemosByFilter, queryTags } from '../api/memo';
+import { RequestCode } from '../api';
 
 const memosList = ref<({
     id: string
@@ -21,8 +22,16 @@ const memosList = ref<({
 })[]>([])
 const isLoading = ref(false)
 const isMore = ref(true)
-const pageNo = ref(1)
 const tags = ref<{ id: string, name: string }[]>([])
+const queryFilter = reactive<{
+    pageNo: number
+    pageSize: number
+    tags: string[]
+}>({
+    pageNo: 1,
+    pageSize: 10,
+    tags: []
+})
 
 const dateList = reactive({
     current: {
@@ -48,18 +57,14 @@ async function onViewVisible(entries: IntersectionObserverEntry[]) {
         return
     }
 
-    console.log(entry)
-
-    const _data = await queryMemos(pageNo.value)
-
+    const _data = await queryMemosByFilter(queryFilter)
     const data = dataTransform(_data.data)
-
     if (data.length < 10) {
         isMore.value = false
         observer.unobserve(loadingEle.value!)
     }
 
-    pageNo.value += 1
+    queryFilter.pageNo += 1
     memosList.value = [...memosList.value, ...data]
 }
 
@@ -90,18 +95,24 @@ function onUpdate(memo: any) {
 }
 
 async function initMemos() {
+    memosList.value = []
     isLoading.value = true
-    const _data = await queryMemos(pageNo.value)
+    isMore.value = true
+    const _data = await queryMemosByFilter(queryFilter)
 
-    const data = dataTransform(_data.data)
-
-    if (data.length < 10) {
+    if (_data.code === RequestCode.REQUEST_ERROR) {
+        isLoading.value = false
         isMore.value = false
+        return
     }
 
-    memosList.value = data
-    pageNo.value += 1
+    memosList.value = dataTransform(_data.data)
+    if (memosList.value.length < 10) {
+        isMore.value = false
+    }
     isLoading.value = false
+
+    queryFilter.pageNo += 1
 
     if (isMore.value) {
         observer.observe(loadingEle.value!)
@@ -110,10 +121,21 @@ async function initMemos() {
 
 async function initTags() {
     const { code, data } = await queryTags()
-    if (code !== 1000) {
+    if (code === RequestCode.REQUEST_ERROR) {
         return
     }
     tags.value = data
+}
+
+const onTagClicked = async (tagId: string) => {
+    if (queryFilter.tags.includes(tagId)) {
+        queryFilter.tags = queryFilter.tags.filter(_tagId => _tagId != tagId)
+    } else {
+        queryFilter.tags.push(tagId)
+    }
+    queryFilter.pageNo = 1
+    queryFilter.pageSize = 10
+    initMemos()
 }
 
 onMounted(async () => {
@@ -232,7 +254,8 @@ onMounted(async () => {
                     <div class="mt-16px">
                         <div class="text-#808080">标签集</div>
                         <div class="mt-8px flex gap-8px gap-row-0 flex-wrap">
-                            <div v-for="tag in tags" :key="tag.id" class="flex items-center cursor-pointer">
+                            <div v-for="tag in tags" @click="onTagClicked(tag.id)" :data-tagId="tag.id" :key="tag.id"
+                                class="flex items-center cursor-pointer">
                                 <span class="text-1em text-#808080">#</span>
                                 <span class="ml-2px text-0.8em">{{ tag.name }}</span>
                             </div>

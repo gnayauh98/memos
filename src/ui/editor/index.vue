@@ -7,7 +7,7 @@ import {
     LoaderIcon,
     MicVocalIcon
 } from 'lucide-vue-next';
-import { ref, useTemplateRef } from 'vue';
+import { onMounted, ref, useTemplateRef } from 'vue';
 import { createMemo, updateMemo } from '../../api/memo';
 import { RequestCode } from '../../api';
 import SelectList from '../resources/SelectList.vue';
@@ -101,11 +101,17 @@ useEventListener('click', (event) => {
     }
 })
 
-const onTextareaInput = (event: Event) => {
-    const textArea = event.target as HTMLTextAreaElement
-    textArea.style.height = 'auto'
-    textArea.style.height = `${textArea.scrollHeight}px`
+const onTextareaInput = () => {
+    if (!textArea.value) {
+        return
+    }
+    textArea.value.style.height = 'auto'
+    textArea.value.style.height = `${textArea.value.scrollHeight}px`
 }
+
+onMounted(() => {
+    onTextareaInput()
+})
 
 </script>
 
@@ -113,7 +119,7 @@ const onTextareaInput = (event: Event) => {
     <!-- 编辑器 -->
     <div class=" bg-#ffffff border-(1px #ececec) shadow-[0_0_4px_#ececec] rounded-8px p-8px">
         <textarea @input="onTextareaInput" :value="textValue" placeholder="此刻的想法..." ref="textarea"
-            class="w-full outline-none min-h-[calc(1*1.5em)]" />
+            class="w-full outline-none min-h-[calc(6*1.5em)]" />
         <!-- 快捷键 -->
         <div class="flex gap-0px items-center">
             <HashIcon class="cursor-pointer p-4px hover:bg-#ececec rounded-8px" :size="24" />

@@ -62,6 +62,11 @@ func Parser(text []byte) []token.Token {
 			Tag:     "link",
 			Matcher: inline.FindLinkIndex,
 		},
+		{
+			Type:    inline.MemoLink,
+			Tag:     "memo",
+			Matcher: inline.FindMemoIndex,
+		},
 	}
 
 	tokens := []token.Token{}

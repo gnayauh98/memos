@@ -42,6 +42,7 @@ type MemoQuery struct {
 	CreatorId string
 	PageSize  int64
 	PageNo    int64
+	Tags      []string
 }
 
 type Tag struct {
@@ -73,40 +74,6 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 		return Memo{}, err
 	}
 	defer tx.Rollback()
-	// 查询已经存在的tags
-	// rows, err := tx.Query("select name, creator_id from tags where creator_id=$1", memoCreate.CreatorId)
-	// if err != nil {
-	// return Memo{}, err
-	// }
-	// defer rows.Close()
-
-	// tagsMap := make(map[string]bool, len(memoCreate.Tags))
-	// for _, tag := range memoCreate.Tags {
-	// 	tagsMap[tag] = false
-	// }
-	// for rows.Next() {
-	// 	var name string
-	// 	err = rows.Scan(&name)
-	// 	if err != nil {
-	// 		return Memo{}, err
-	// 	}
-	// 	tagsMap[name] = true
-	// }
-	// 过滤不存在标签
-
-	if len(memoCreate.Tags) > 0 {
-		valuesStr := make([]any, 0, len(memoCreate.Tags)*2)
-		placeholderStr := make([]string, len(memoCreate.Tags))
-		for index, tag := range memoCreate.Tags {
-			valuesStr = append(valuesStr, tag, memoCreate.CreatorId)
-			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
-		}
-		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s on conflict (name, creator_id) do update set name=excluded.name, creator_id=excluded.creator_id;`, strings.Join(placeholderStr, ","))
-
-		if _, err = tx.Exec(queryStmt, valuesStr...); err != nil {
-			return Memo{}, err
-		}
-	}
 
 	err = tx.QueryRow(
 		"insert into memos (markdown, creator_id) values ($1, $2) returning id, created_at, updated_at;",
@@ -116,6 +83,51 @@ func CreateMemo(memoCreate MemoCreate, store Store) (Memo, error) {
 
 	if err != nil {
 		return Memo{}, err
+	}
+
+	if len(memoCreate.Tags) > 0 {
+		valuesStr := make([]any, 0, len(memoCreate.Tags)*2)
+		placeholderStr := make([]string, len(memoCreate.Tags))
+		for index, tag := range memoCreate.Tags {
+			valuesStr = append(valuesStr, tag, memoCreate.CreatorId)
+			placeholderStr[index] = fmt.Sprintf("($%d,$%d)", 2*index+1, 2*index+2)
+		}
+		queryStmt := fmt.Sprintf(`insert into tags (name, creator_id) values %s on conflict (name, creator_id) do update set name=excluded.name, creator_id=excluded.creator_id returning id, name;`, strings.Join(placeholderStr, ","))
+
+		rows, err := tx.Query(queryStmt, valuesStr...)
+
+		if err != nil {
+			return Memo{}, err
+		}
+
+		defer rows.Close()
+
+		memoTagPairStr := make([]any, 0, len(memoCreate.Tags)*2)
+
+		for rows.Next() {
+
+			tagMemo := TagMemo{
+				MemoId: memo.Id,
+				// CreatorId: memo.CreatorId,
+			}
+
+			err = rows.Scan(&tagMemo.TagId, &tagMemo.TagName)
+
+			if err != nil {
+				return Memo{}, err
+			}
+
+			memoTagPairStr = append(memoTagPairStr, tagMemo.TagId, tagMemo.MemoId)
+		}
+
+		// 插入memo-tag
+		queryStmt = fmt.Sprintf(`insert into memo_tag (tag_id, memo_id) values %s on conflict (tag_id, memo_id) do update set tag_id=excluded.tag_id, memo_id=excluded.memo_id;`, strings.Join(placeholderStr, ","))
+
+		_, err = tx.Exec(queryStmt, memoTagPairStr...)
+
+		if err != nil {
+			return Memo{}, err
+		}
 	}
 
 	if err = tx.Commit(); err != nil {
@@ -260,19 +272,34 @@ func QueryMemos(memoQuery MemoQuery, store Store) ([]Memo, error) {
 	var rows *sql.Rows
 	var err error
 
-	if memoQuery.PageNo != 0 && memoQuery.PageSize != 0 {
-		rows, err = store.db.Query(
-			"select memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by created_at desc limit $2 offset $3",
-			memoQuery.CreatorId,
-			memoQuery.PageSize,
-			(memoQuery.PageNo-1)*memoQuery.PageSize,
-		)
-	} else {
-		rows, err = store.db.Query(
-			"select memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status, users.username from memos left join users on memos.creator_id = users.id where creator_id=$1 order by created_at desc",
-			memoQuery.CreatorId,
-		)
+	tags := ""
+	queryResultFiled := "memos.id, memos.markdown, memos.created_at, memos.updated_at, memos.creator_id, memos.status, users.username"
+	queryTags := ""
+	queryWhere := "creator_id=$1"
+	if len(memoQuery.Tags) > 0 {
+		tags = fmt.Sprintf("memo_tag.tag_id in (%s)", strings.Join(memoQuery.Tags, ","))
+		queryWhere += fmt.Sprintf(" and %s", tags)
+		queryTags = "join memo_tag on memos.id = memo_tag.memo_id"
 	}
+
+	if memoQuery.PageNo == 0 {
+		memoQuery.PageNo = 1
+	}
+	if memoQuery.PageSize == 0 {
+		memoQuery.PageSize = 10
+	}
+
+	rows, err = store.db.Query(
+		fmt.Sprintf(
+			"select %s from memos %s join users on memos.creator_id = users.id where %s group by memos.id, users.username order by created_at desc limit $2 offset $3",
+			queryResultFiled,
+			queryTags,
+			queryWhere,
+		),
+		memoQuery.CreatorId,
+		memoQuery.PageSize,
+		(memoQuery.PageNo-1)*memoQuery.PageSize,
+	)
 
 	if err != nil {
 		return []Memo{}, err
