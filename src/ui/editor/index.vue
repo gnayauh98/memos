@@ -112,13 +112,12 @@ const onTextareaInput = () => {
 onMounted(() => {
     onTextareaInput()
 })
-
 </script>
 
 <template>
     <!-- 编辑器 -->
     <div class=" bg-#ffffff border-(1px #ececec) shadow-[0_0_4px_#ececec] rounded-8px p-8px">
-        <textarea @input="onTextareaInput" :value="textValue" placeholder="此刻的想法..." ref="textarea"
+        <textarea @input="onTextareaInput" v-model="textValue" placeholder="此刻的想法..." ref="textarea"
             class="w-full outline-none min-h-[calc(6*1.5em)]" />
         <!-- 快捷键 -->
         <div class="flex gap-0px items-center">

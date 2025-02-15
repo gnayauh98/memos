@@ -25,12 +25,17 @@ onMounted(async () => {
             memoList.value = [...memoList.value, ...data.data]
             if (data?.data?.length < 10) {
                 isMore.value = false
-                observer.unobserve(loading.value)
+                if (loading.value) {
+                    observer.unobserve(loading.value)
+                }
+
             }
         }
     })
 
-    observer.observe(loading.value)
+    if (loading.value) {
+        observer.observe(loading.value)
+    }
 })
 </script>
 

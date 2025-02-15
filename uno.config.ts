@@ -10,5 +10,5 @@ export default defineConfig({
     transformers: [
         transformerVariantGroup()
     ],
-    safelist: ["i-lucide:clipboard", "i-lucide:link"]
+    safelist: ["i-lucide:clipboard", "i-lucide:link", "i-lucide:x"]
 })

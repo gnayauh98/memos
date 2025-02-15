@@ -17,8 +17,15 @@ func NewAuthApi(group fiber.Router) fiber.Router {
 
 	authApi.Post("/signin", SignIn)
 	authApi.Post("/verify", IsValid)
+	authApi.Get("/ping", ping)
 
 	return authApi
+}
+
+func ping(c *fiber.Ctx) error {
+	return c.JSON(fiber.Map{
+		"ok": true,
+	})
 }
 
 type SignInResult struct {

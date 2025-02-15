@@ -16,6 +16,11 @@ func NewStore(config db.DBConfig) (Store, error) {
 	if err != nil {
 		return Store{}, err
 	}
+	err = _db.Ping()
+	if err != nil {
+		log.Println("数据库连接失败")
+		return Store{}, err
+	}
 	log.Println("数据库连接成功")
 	return Store{
 		db: _db,

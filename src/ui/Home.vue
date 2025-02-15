@@ -13,6 +13,7 @@ import {
 import dayjs from 'dayjs';
 import { queryMemosByFilter, queryTags } from '../api/memo';
 import { RequestCode } from '../api';
+import Switch from '../components/Switch.vue';
 
 const memosList = ref<({
     id: string
@@ -252,13 +253,22 @@ onMounted(async () => {
                     </div>
                     <!-- 标签区域 -->
                     <div class="mt-16px">
-                        <div class="text-#808080">标签集</div>
-                        <div class="mt-8px flex gap-8px gap-row-0 flex-wrap">
-                            <div v-for="tag in tags" @click="onTagClicked(tag.id)" :data-tagId="tag.id" :key="tag.id"
-                                class="flex items-center cursor-pointer">
-                                <span class="text-1em text-#808080">#</span>
-                                <span class="ml-2px text-0.8em">{{ tag.name }}</span>
+                        <div class="flex items-center">
+                            <span class="text-#808080">标签集</span>
+                            <div class="ml-auto">
+                                <Switch />
                             </div>
+                        </div>
+                        <div class="mt-8px flex gap-8px gap-row-2px flex-wrap">
+                            <template v-for="tag in tags" :key="tag.id">
+                                <div :data-tagId="tag.id" @click="onTagClicked(tag.id)"
+                                    class="flex items-center cursor-pointer border-1px rounded-0.75em pl-0.5em pr-0.5em">
+                                    <span class="text-1em text-#808080">#</span>
+                                    <span class="ml-2px text-0.8em">{{ tag.name }}</span>
+                                    <span v-if="queryFilter.tags.includes(tag.id)"
+                                        class="i-lucide:x text-#acacac ml-0.3em"></span>
+                                </div>
+                            </template>
                         </div>
                     </div>
                 </div>
