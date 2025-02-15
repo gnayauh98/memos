@@ -35,6 +35,12 @@ func Parser(text []byte) []token.Token {
 			Matcher: blocks.FindImageIndex,
 		},
 		{
+			Type:    blocks.Quote,
+			Tag:     "quote",
+			Matcher: blocks.FindQuoteIndex,
+		},
+		// 任何内容均没有匹配
+		{
 			Type:    blocks.Paragraph,
 			Tag:     "p",
 			Matcher: blocks.FindParagraphIndex,

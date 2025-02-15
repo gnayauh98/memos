@@ -153,3 +153,11 @@ li.list-item::before {
   color: blue;
   margin-right: 2px;
 }
+
+.quote {
+  border-left: 4px solid #fbbe24;
+  padding: 8px 4px 8px 4px;
+  margin: 8px 0;
+  color: #666;
+  background: linear-gradient(to right, #fbf1c6, #fef2c7);
+}

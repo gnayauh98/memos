@@ -36,6 +36,8 @@ func RenderBlockStart(texts []byte, token token.Token) string {
 	case int(blocks.Header):
 		headerLevel := len(string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]]))
 		return fmt.Sprintf("<h%d>", headerLevel)
+	case int(blocks.Quote):
+		return "<div class=\"quote\">"
 	case int(blocks.List):
 		return "<li class=\"list-item\">"
 	case int(blocks.TodoList):
@@ -96,6 +98,8 @@ func RenderBlockEnd(texts []byte, token token.Token) string {
 	case int(blocks.Header):
 		headerLevel := len(string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]]))
 		return fmt.Sprintf("</h%d>", headerLevel)
+	case int(blocks.Quote):
+		return "</div>"
 	case int(blocks.List):
 		return "</li>"
 	case int(blocks.TodoList):

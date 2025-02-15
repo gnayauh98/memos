@@ -16,6 +16,7 @@ const (
 	List
 	Code
 	Image
+	Quote
 )
 
 type Block struct {
@@ -52,6 +53,8 @@ func (indexes Indexes) GetIndexesContent(text []byte) []byte {
 		return GetListContent(text, indexes.Indexes)
 	case Code:
 		return GetCodeContent(text, indexes.Indexes)
+	case Quote:
+		return GetQuoteContent(text, indexes.Indexes)
 	}
 	return []byte{}
 }
@@ -68,6 +71,8 @@ func (indexes Indexes) GetContentStartIndex() int {
 		return indexes.Matches[0]
 	case Code:
 		return indexes.Matches[2]
+	case Quote:
+		return indexes.Matches[0]
 	}
 	return 0
 }
