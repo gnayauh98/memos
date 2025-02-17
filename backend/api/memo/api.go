@@ -247,6 +247,10 @@ func QueryMemoById(c *fiber.Ctx) error {
 		return err
 	}
 
+	texts := []byte(memo.Content)
+	tokens := parser.Parser(texts)
+	memo.Content = render.RenderToHtml(texts, tokens)
+
 	return c.JSON(memo)
 }
 

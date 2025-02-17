@@ -126,7 +126,7 @@ onMounted(() => {
             <SquareMousePointerIcon class="cursor-pointer p-4px hover:bg-#ececec rounded-8px" :size="24" />
             <div class="relative package-open">
                 <PackageOpenIcon @click="onPackageClicked" class="cursor-pointer p-4px hover:bg-#ececec rounded-8px"
-                    :size="24" />
+                    :class="{ 'bg-#ececec': isShowPackage }" :size="24" />
                 <SelectList @select="onSelectResource" v-if="isShowPackage"
                     class="absolute z-99 top-8px -right-404px shadow-[0_0_6px_#aaaaaa]" />
             </div>

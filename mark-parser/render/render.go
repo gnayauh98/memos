@@ -125,8 +125,8 @@ func RenderInline(texts []byte, token token.Token) string {
 		link := string(texts[token.BlockStartIndex+token.Matches[2] : token.BlockStartIndex+token.Matches[3]])
 		return fmt.Sprintf("<a class=\"outlink\" target=\"_blank\" href=\"%s\">%s</a>", link, text)
 	case int(inline.MemoLink):
-		link := string(texts[token.BlockStartIndex+token.Matches[0] : token.BlockStartIndex+token.Matches[1]])
-		return fmt.Sprintf("<a class=\"memo-link\"><span class=\"memo-link-mark i-lucide:link\"></span>%s</a>", link)
+		link := string(texts[token.BlockStartIndex+token.Matches[2] : token.BlockStartIndex+token.Matches[3]])
+		return fmt.Sprintf("<a href=\"%s\" class=\"memo-link\"><span class=\"memo-link-mark i-lucide:link\"></span>%s</a>", link, text)
 	}
 
 	return text

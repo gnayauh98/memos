@@ -3,7 +3,7 @@ package inline
 import "regexp"
 
 const (
-	MemoRegexp = `^@\[(.*)\]`
+	MemoRegexp = `^@\[(.*)\]\((.*?)\)`
 )
 
 func FindMemoIndex(texts []byte) (Indexes, bool) {
@@ -11,7 +11,7 @@ func FindMemoIndex(texts []byte) (Indexes, bool) {
 
 	matches := re.FindSubmatchIndex(texts)
 
-	if len(matches) == 4 {
+	if len(matches) == 6 {
 		return Indexes{
 			Indexes: matches,
 			Type:    MemoLink,

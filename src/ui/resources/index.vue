@@ -70,9 +70,9 @@ onMounted(async () => {
       </div>
       <!-- <div class="ml-auto bg-green px-1em py-0.25em rounded-0.25em">上传</div> -->
     </div>
-    <div class="mt-16px flex flex-wrap gap-x-8px gap-y-16px">
-      <div class="w-200px h-120px" v-for="resource in resourceList" :key="resource.id">
-        <img class="w-full h-full border-(1px solid #aaaaaa) rounded-8px object-cover" :src="resource.url" />
+    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 mt-16px gap-x-8px gap-y-16px">
+      <div class="aspect-16/9" v-for="resource in resourceList" :key="resource.id">
+        <img class="w-full h-full border-(1px solid #aaaaaa) rounded-8px object-contain" :src="resource.url" />
         <!-- <div class="text-center">图片{{ resource.id }}</div> -->
       </div>
     </div>

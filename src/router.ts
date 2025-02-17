@@ -6,6 +6,7 @@ import Explore from './ui/Explore.vue'
 import SignIn from './ui/SignIn.vue'
 import Resources from './ui/resources/index.vue'
 import { verify } from './api/user'
+import Memo from './ui/memo/index.vue'
 
 async function auth() {
     const accessToken = localStorage.getItem("access-token")
@@ -28,6 +29,12 @@ const routes: RouteRecordRaw[] = [
                 name: 'home',
                 path: '',
                 component: Home,
+                beforeEnter: auth
+            },
+            {
+                name: 'memo',
+                path: 'memo/:id',
+                component: Memo,
                 beforeEnter: auth
             },
             {
