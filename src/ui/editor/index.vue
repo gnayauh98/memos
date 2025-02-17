@@ -50,6 +50,7 @@ const onCreate = async () => {
         textArea.value.value = ""
     }
     loading.value = false
+    textValue.value = ""
 }
 
 const onUpdate = async () => {
