@@ -17,7 +17,7 @@ const memoModal = reactive({
 function load() {
     memoModal.loading = true
     const id = route.params.id as string;
-    getMemoById(id).then(({ data }) => {
+    getMemoById(id, { html: true }).then(({ data }) => {
         memoModal.memo = { ...data }
     }).finally(() => {
         memoModal.loading = false
@@ -42,7 +42,7 @@ load()
                     <div class="mt-6px text-12px text-#aaaaaa">
                         <span class="">#我的日记#任务#算法</span>
                         <span class="ml-16px">{{ dayjs(memoModal.memo.createAt ?? Date.now()).format("YYYY-MM-DD HH:mm")
-                            }}</span>
+                        }}</span>
                     </div>
                 </div>
             </div>

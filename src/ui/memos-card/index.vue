@@ -3,6 +3,7 @@ import { EllipsisVerticalIcon, ListStartIcon, MessagesSquareIcon, PencilIcon, XI
 import Editor from '../editor/index.vue'
 import { ref } from 'vue';
 import { getMemoById } from '../../api/memo';
+import { useRouter } from 'vue-router';
 
 const props = defineProps<{
     id: string
@@ -10,6 +11,8 @@ const props = defineProps<{
     updateDate: string
     content: string
 }>()
+
+const router = useRouter()
 
 const emits = defineEmits(["update"])
 
@@ -36,7 +39,8 @@ const onUpdate = (memo: any) => {
         <div class="flex items-center">
             <div class="text-0.75em font-600 text-#00009f cursor-pointer">{{ author ? `@${author}` : '' }}</div>
             <div class="ml-8px text-0.75em text-#808080">{{ updateDate }}</div>
-            <MessagesSquareIcon class="ml-auto cursor-pointer text-#808080" :size="12" />
+            <div @click="router.push({ path: `/memo/${id}` })" class="mx-auto grow h-1em cursor-pointer"></div>
+            <MessagesSquareIcon class="cursor-pointer text-#808080" :size="12" />
             <div class="ml-4px">
                 <div class="relative group">
                     <EllipsisVerticalIcon :size="12"

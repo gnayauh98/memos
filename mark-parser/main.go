@@ -9,11 +9,12 @@ import (
 
 func main() {
 
-	text := "```go\npackage main\nfunc main(){\nprintln(\"hello, anqzi!\")\n```"
+	text := "下午`UI`op\n\nOP"
 
 	bytes := []byte(text)
 	tokens := parser.Parser(bytes)
 
+	fmt.Println(tokens)
 	html := render.RenderToHtml(bytes, tokens)
 
 	fmt.Println(html)

@@ -57,7 +57,7 @@ export async function updateMemo(content: string, id: string) {
     }
 }
 
-export async function getMemoById(id: string) {
+export async function getMemoById(id: string, { html = false }: { html?: boolean } = {}) {
 
     const accessToken = localStorage.getItem("access-token") ?? ""
 
@@ -66,7 +66,10 @@ export async function getMemoById(id: string) {
         headers: {
             'content-type': 'application/json',
             'authorization': `bearer ${accessToken}`
-        }
+        },
+        body: JSON.stringify({
+            html
+        })
     })
 
 

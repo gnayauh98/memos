@@ -46,6 +46,7 @@ func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers
 						Tag:             0,
 						BlockStartIndex: blockStartIndex,
 						Text:            []int{startIndex, endIndex}, // 在文本内部的偏移
+						Matches:         []int{startIndex, endIndex},
 						Children:        []token.Token{},
 					})
 				}
@@ -53,7 +54,7 @@ func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers
 					Type:            "inline",
 					Tag:             int(indexes.Type),
 					BlockStartIndex: blockStartIndex,
-					Text:            []int{index + indexes.Indexes[2], index + indexes.Indexes[3]},
+					Text:            []int{index + indexes.Indexes[0], index + indexes.Indexes[1]},
 					Children:        []token.Token{},
 					Matches:         indexes.Matches,
 				})
@@ -74,6 +75,7 @@ func InlineParse(text []byte, tokens []token.Token, blockStartIndex int, parsers
 			Tag:             0,
 			BlockStartIndex: blockStartIndex,
 			Text:            []int{startIndex, len(text)},
+			Matches:         []int{startIndex, len(text)},
 			Children:        []token.Token{},
 		})
 	}

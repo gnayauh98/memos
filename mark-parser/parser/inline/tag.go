@@ -15,6 +15,7 @@ func FindTagIndex(text []byte) (Indexes, bool) {
 		return Indexes{
 			Indexes: matches,
 			Type:    Tag,
+			Matches: matches[2:],
 		}, true
 	}
 

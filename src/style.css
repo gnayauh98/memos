@@ -69,6 +69,7 @@ div:has(~ pre)>.icon {
   border: 1px solid #eaeaea;
   border-radius: 0.25em;
   padding: 0 0.30em;
+  color: #acacac;
 }
 
 .outlink {
@@ -156,8 +157,44 @@ li.list-item::before {
 
 .quote {
   border-left: 4px solid #fbbe24;
-  padding: 8px 4px 8px 4px;
-  margin: 8px 0;
+  padding: 0px 4px 0px 4px;
   color: #666;
   background: linear-gradient(to right, #fbf1c6, #fef2c7);
+}
+
+:not(.quote)+.quote {
+  padding-top: 8px;
+  margin-top: 8px;
+}
+
+.quote:has(+ :not(.quote)) {
+  padding-bottom: 8px;
+  margin-bottom: 8px;
+}
+
+/* .quote:has(+ .quote) {
+  padding: 8px 4px 0px 4px;
+  margin: 8px 0 0 0;
+} */
+
+/* .quote {
+  padding: 8px 4px 0px 4px;
+  margin: 8px 0 0 0;
+} */
+
+.empty-line {
+  width: 100%;
+  height: 1.5em;
+}
+
+.code-block {
+  margin: 8px 0;
+}
+
+.code-block>.top {
+  padding-top: 4px;
+}
+
+.code-block>pre {
+  padding-bottom: 8px;
 }

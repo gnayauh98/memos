@@ -231,11 +231,21 @@ func QueryMemosByFilter(c *fiber.Ctx) error {
 	return c.JSON(memos)
 }
 
+type MemoQueryParams struct {
+	Html bool `json:"html"`
+}
+
 func QueryMemoById(c *fiber.Ctx) error {
 
 	id := c.Params("id")
 	_store, _ := c.Locals("store").(*store.Store)
 	userId, _ := c.Locals("user_id").(string)
+
+	params := MemoQueryParams{}
+
+	if err := c.BodyParser(&params); err != nil {
+		return err
+	}
 
 	if len(id) == 0 {
 		return errors.New("请上传ID")
@@ -247,9 +257,11 @@ func QueryMemoById(c *fiber.Ctx) error {
 		return err
 	}
 
-	texts := []byte(memo.Content)
-	tokens := parser.Parser(texts)
-	memo.Content = render.RenderToHtml(texts, tokens)
+	if params.Html {
+		texts := []byte(memo.Content)
+		tokens := parser.Parser(texts)
+		memo.Content = render.RenderToHtml(texts, tokens)
+	}
 
 	return c.JSON(memo)
 }

@@ -15,6 +15,7 @@ func FindBlobIndex(text []byte) (Indexes, bool) {
 		return Indexes{
 			Indexes: matches,
 			Type:    Blob,
+			Matches: matches[2:],
 		}, true
 	}
 

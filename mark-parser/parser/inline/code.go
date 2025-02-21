@@ -15,6 +15,7 @@ func FindCodeIndex(text []byte) (Indexes, bool) {
 		return Indexes{
 			Indexes: matches,
 			Type:    Code,
+			Matches: matches[2:],
 		}, true
 	}
 

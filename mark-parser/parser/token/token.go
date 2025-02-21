@@ -10,10 +10,12 @@ type Token struct {
 }
 
 func GetTags(texts []byte, tokens []Token) []string {
+
 	tags := make([]string, 0)
 	for _, token := range tokens {
+		startIndex := token.BlockStartIndex + token.Text[0]
 		if token.Tag == 3 {
-			tags = append(tags, string(texts[token.BlockStartIndex+token.Text[0]:token.BlockStartIndex+token.Text[1]]))
+			tags = append(tags, string(texts[startIndex+token.Matches[0]:startIndex+token.Matches[1]]))
 		}
 	}
 
