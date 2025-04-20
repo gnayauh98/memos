@@ -1,6 +1,4 @@
-# Anqzi
-
-> 命名没有含义，随便取地。
+# memos
 
 对usememos的复刻和扩展
 
